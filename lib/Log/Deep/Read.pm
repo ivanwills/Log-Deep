@@ -24,10 +24,10 @@ our @EXPORT_OK   = qw//;
 our %EXPORT_TAGS = ();
 
 Readonly my $LEVEL_COLOURS => {
-		note     => '',
+		info     => '',
 		message  => '',
 		debug    => '',
-		warning  => 'yellow',
+		warn  => 'yellow',
 		error    => 'red',
 		fatal    => 'bold red',
 		security => '',
@@ -78,6 +78,10 @@ sub read_files {
 			$self->read_file($files{$file});
 		}
 
+		# turn off tracking last lines/sessions
+		$self->{number} = 0;
+		$self->{'session-number'} = 0;
+
 		# every 1,000 itterations check if there are any new files matching
 		# any passed globs in, allows not having to re-run every time a new
 		# log file is created.
@@ -99,6 +103,8 @@ sub read_files {
 
 sub read_file {
 	my ($self, $file) = @_;
+	my @lines;
+	my %sessions;
 
 	if (!$file->{handle}) {
 		# TODO implement seeking to end and going back correct number of lines ...
@@ -108,11 +114,53 @@ sub read_file {
 
 	# read the rest of the lines in the file
 	while (my $line = <$fh>) {
+		while ( $line !~ /\n$/xms ) {
+			# guarentee that we have a full log line, ie if we read a line before it has been completely written
+			$line .= <$fh>;
+		}
+
 		my @line = $self->parse_line($line);
 
 		next if !$self->show_line(@line);
 
-		$self->display_line(@line);
+		my $line_text = $self->display_line(@line);
+
+		if ($self->{number}) {
+			push @lines, $line_text;
+		}
+		elsif ( $self->{'session-number'} ) {
+			# work out what to do
+			my $session = $line[1];
+			push @lines, $session if !$sessions{$session};
+			$sessions{$session} ||= '';
+			$sessions{$session}  .= $line_text;
+		}
+		else {
+			if ( !$self->{last_print_file} || $self->{last_print_file} ne $file ) {
+				print "\n==> $file->{name} <==\n";
+				$self->{last_print_file} = $file;
+			}
+			print $line_text;
+		}
+	}
+
+	if (@lines) {
+		if ( !$self->{last_print_file} || $self->{last_print_file} ne $file ) {
+			print "\n==> $file->{name} <==\n";
+			$self->{last_print_file} = $file;
+		}
+
+		if ($self->{number}) {
+			my $first_line = @lines - $self->{number} <= 0 ? 0 : @lines - $self->{number};
+			print @lines[ $first_line .. (@lines - 1) ];
+		}
+		elsif ( $self->{'session-number'} ) {
+			# work out what to do
+			my $first_line = @lines - $self->{'session-number'} <= 0 ? 0 : @lines - $self->{'session-number'};
+			for my $i ( $first_line .. (@lines - 1) ) {
+				print $sessions{$lines[$i]};
+			}
+		}
 	}
 
 	# reset the file handle so that it can be read again;
@@ -148,39 +196,40 @@ sub show_line {
 
 sub display_line {
 	my ($self, $time, $session, $level, $message, $data) = @_;
+	my $out = '';
 
-	my $last = $self->{last_line_time};
+	my $last = $self->{last_line_time} || 0;
 	my $now  = time;
 	if ( $self->{breaks} && $now > $last + $self->{short_break} ) {
 		my $lines = $now > $last + $self->{long_break} ? $self->{long_lines} : $self->{short_lines};
-		print "\n" x $lines;
+		$out .= "\n" x $lines;
 	}
 	$self->{last_line_time} = $now;
 
 	$level = colored $level, $LEVEL_COLOURS->{$level};
-	print color $self->session_colour($session);
-	print "[$time]";
-	print " $session" if $self->{verbose};
-	print color 'reset';
-	print " $level - $message\n";
+	$out .= color $self->session_colour($session);
+	$out .= "[$time]";
+	$out .= " $session" if $self->{verbose};
+	$out .= color 'reset';
+	$out .= " $level - $message\n";
 
 	if ($self->{display}) {
-		$self->display_data($data);
+		$out .= $self->display_data($data);
 	}
 
-	return;
+	return $out;
 }
 
 sub display_data {
 	my ($self, $data) = @_;
 	my $display = $self->{display};
+	my $out     = '';
 
 	FIELD:
 	for my $field ( sort keys %{ $display } ) {
 		if ( ref $display->{$field} eq 'ARRAY' ) {
 			for my $sub_field ( @{ $display->{$field} } ) {
-				warn $sub_field;
-				print $self->{dump}->Names( $field . '_' . $sub_field )->Data( $data->{$field}{$sub_field} )->Out();
+				$out .= $self->{dump}->Names( $field . '_' . $sub_field )->Data( $data->{$field}{$sub_field} )->Out();
 			}
 		}
 		elsif ( $display->{$field} eq 0 ) {
@@ -189,19 +238,18 @@ sub display_data {
 		elsif ( $display->{$field} ne 1 ) {
 			$display->{$field} = [ split /,/, $display->{$field} ];
 			for my $sub_field ( @{ $display->{$field} } ) {
-				warn $sub_field;
-				print $self->{dump}->Names( $field . '_' . $sub_field )->Data( $data->{$field}{$sub_field} )->Out();
+				$out .= $self->{dump}->Names( $field . '_' . $sub_field )->Data( $data->{$field}{$sub_field} )->Out();
 			}
 		}
-		elsif ( $field eq 'data' && !defined $data->{data} ) {
+		elsif ( $field eq 'data' && (!defined $data->{data} || !%{ $data->{data} }) ) {
 			# don't print anything
 		}
 		else {
-			print $self->{dump}->Names($field)->Data($data->{$field})->Out();
+			$out .= $self->{dump}->Names($field)->Data($data->{$field})->Out();
 		}
 	}
 
-	return;
+	return $out;
 }
 
 sub session_colour {
@@ -229,19 +277,19 @@ sub session_colour {
 
 	my $colour = "$colours[$self->{foreground}] on_$colours[$self->{background}]";
 
-	# remove old sessions
-	if ( keys %{ $self->{sessions} } > $self->{sessions_max} ) {
-		# get max session with the current colour
-		my $time = 0;
-		for my $session ( keys %{ $self->{sessions} } ) {
-			$time = $self->{session}{$session}{time} if $time < $self->{session}{$session}{time} && $self->{session}{$session}{colour} eq $colour;
-		}
-
-		# now remove sessions older than $time
-		for my $session ( keys %{ $self->{sessions} } ) {
-			delete $self->{session}{$session} if $self->{session}{$session}{time} <= $time;
-		}
-	}
+#	# remove old sessions
+#	if ( keys %{ $self->{sessions} } > $self->{sessions_max} ) {
+#		# get max session with the current colour
+#		my $time = 0;
+#		for my $session ( keys %{ $self->{sessions} } ) {
+#			$time = $self->{session}{$session}{time} if $time < $self->{session}{$session}{time} && $self->{session}{$session}{colour} eq $colour;
+#		}
+#
+#		# now remove sessions older than $time
+#		for my $session ( keys %{ $self->{sessions} } ) {
+#			delete $self->{session}{$session} if $self->{session}{$session}{time} <= $time;
+#		}
+#	}
 
 	# cache the session info
 	$self->{sessions}{$session_id}{time}   = time;

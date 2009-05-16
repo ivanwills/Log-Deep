@@ -20,7 +20,7 @@ use base qw/Exporter/;
 
 our $VERSION     = version->new('0.0.6');
 
-Readonly my @LOG_LEVELS => qw/note message debug warning error fatal/;
+Readonly my @LOG_LEVELS => qw/info message debug warn error fatal/;
 
 sub new {
 	my $class  = shift;
@@ -33,10 +33,10 @@ sub new {
 
 	# set up log levels
 	if (!$param{-level}) {
-		$self->level(qw/warning error fatal/);
+		$self->level(qw/warn error fatal/);
 	}
 	else {
-		$self->level(ref $param{-level} ? @{$param{-level}} : $param{-level});
+		$self->level(ref $param{-level} eq 'ARRAY' ? @{$param{-level}} : $param{-level});
 	}
 
 	# set up the log file parameters
@@ -58,10 +58,7 @@ sub new {
 	$self->{vars} = $param{-vars} || {};
 
 	if ($param{-catchwarn}) {
-		# install a redirect of all warnings to $self->warning
-		$SIG{__WARN__} = sub {
-			$self->warning( $_[0] );
-		}
+		$self->catch_warnings(1);
 	}
 
 	# check if we are starting a session or not
@@ -75,16 +72,16 @@ sub new {
 	return $self;
 }
 
-sub note {
+sub info {
 	my ($self, @params) = @_;
 
-	return if !$self->level(-log => 'note');
+	return if !$self->is_info;
 
 	if (!ref $params[0] || ref $params[0] ne 'HASH') {
 		unshift @params, {};
 	}
 
-	$params[0]{-level} = 'note';
+	$params[0]{-level} = 'info';
 
 	return $self->record(@params);
 }
@@ -92,7 +89,7 @@ sub note {
 sub message {
 	my ($self, @params) = @_;
 
-	return if !$self->level(-log => 'message');
+	return if !$self->is_message;
 
 	if (!ref $params[0] || ref $params[0] ne 'HASH') {
 		unshift @params, {};
@@ -106,7 +103,7 @@ sub message {
 sub debug {
 	my ($self, @params) = @_;
 
-	return if !$self->level(-log => 'debug');
+	return if !$self->is_debug;
 
 	if (!ref $params[0] || ref $params[0] ne 'HASH') {
 		unshift @params, {};
@@ -117,16 +114,16 @@ sub debug {
 	return $self->record(@params);
 }
 
-sub warning {
+sub warn {
 	my ($self, @params) = @_;
 
-	return if !$self->level(-log => 'warning');
+	return if !$self->is_warn;
 
 	if (!ref $params[0] || ref $params[0] ne 'HASH') {
 		unshift @params, {};
 	}
 
-	$params[0]{-level} = 'warning';
+	$params[0]{-level} = 'warn';
 
 	return $self->record(@params);
 }
@@ -134,7 +131,7 @@ sub warning {
 sub error {
 	my ($self, @params) = @_;
 
-	return if !$self->level(-log => 'error');
+	return if !$self->is_error;
 
 	if (!ref $params[0] || ref $params[0] ne 'HASH') {
 		unshift @params, {};
@@ -315,10 +312,63 @@ sub level {
 	return clone $self->{level};
 }
 
+sub enable {
+	my ($self, @levels) = @_;
+
+	for my $level (@levels) {
+		$self->{level}{$level} = 1;
+	}
+	return;
+}
+
+sub disable {
+	my ($self, @levels) = @_;
+
+	for my $level (@levels) {
+		$self->{level}{$level} = 0;
+	}
+
+	return;
+}
+
+sub is_info     { return $_[0]->{level}{info}     }
+sub is_message  { return $_[0]->{level}{message}  }
+sub is_debug    { return $_[0]->{level}{debug}    }
+sub is_warn     { return $_[0]->{level}{warn}     }
+sub is_error    { return $_[0]->{level}{error}    }
+sub is_fatal    { return $_[0]->{level}{fatal}    }
+sub is_security { return 1                        }
+
 sub file {
 	my ($self) = @_;
 
 	return $self->{log_file};
+}
+
+sub catch_warnings {
+	my ($self, $action) = @_;
+
+	if ( $action == 1 && !$self->{old_warn_handle} ) {
+		# save old handle
+		$self->{old_warn_handle} = $SIG{__WARN__};
+
+		# install a redirect of all warnings to $self->warn
+		$SIG{__WARN__} = sub {
+			my $data = {};
+			if ( ref $_[0] ) {
+				# record the error reference for better display
+				# using the error in the message just stringifys it
+				$data->{ERROR_OBJ} = $_[0];
+			}
+			$self->warn( $data, $_[0] );
+		}
+	}
+	elsif ( $action == 0 && $self->{old_warn_handle} ) {
+		$SIG{__WARN__} = $self->{old_warn_handle};
+		delete $self->{old_warn_handle};
+	}
+
+	return $self->{old_warn_handle} && 1;
 }
 
 1;
@@ -400,7 +450,7 @@ Return: Log::Deep - A new Log::Deep object
 
 Description: This creates a new log object.
 
-=head3 C<note ( $var )>
+=head3 C<info ( $var )>
 
 Param: C<$> - type -
 
@@ -424,7 +474,7 @@ Return:  -
 
 Description:
 
-=head3 C<warning ( $var )>
+=head3 C<warn ( $var )>
 
 Param: C<$> - type -
 
@@ -488,11 +538,73 @@ Return:  -
 
 Description:
 
+=head3 C<enable (@levels)>
+
+Param: C<@levels> - strings - The names of levels to enable
+
+Description: Enables the supplied levels
+
+=head3 C<disable (@levels)>
+
+Param: C<@levels> - strings - The names of levels to disable
+
+Description: Disables the supplied levels
+
+=head3 C<is_info  ()>
+
+Return: bool - True if the info log level is enabled
+
+Description:
+
+=head3 C<is_message  ()>
+
+Return: bool - True if the message log level is enabled
+
+Description:
+
+=head3 C<is_debug ()>
+
+Return: bool - True if the debug log level is enabled
+
+Description:
+
+=head3 C<is_warn  ()>
+
+Return: bool - True if the warn log level is enabled
+
+Description:
+
+=head3 C<is_error ()>
+
+Return: bool - True if the error log level is enabled
+
+Description:
+
+=head3 C<is_fatal ()>
+
+Return: bool - True if the fatal log level is enabled
+
+Description:
+
+=head3 C<is_security ()>
+
+Return: bool - True if the security log level is enabled
+
+Description:
+
 =head3 C<file ( $var )>
 
 Return: string - The file name of the currently being written to log file
 
 Description: Gets the file name of the current log file
+
+=head3 C<catch_warnings ( $action )>
+
+Param: C<$action> - 1 | 0 | undef - Set catch warnings (1), unset catch warnings (0) or report state (undef)
+
+Return: bool - True if currently catching warnings, false if not
+
+Description: Turns on/off catching warnings and/or returns the current warn catching state.
 
 =head1 DIAGNOSTICS
 
