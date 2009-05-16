@@ -15,6 +15,7 @@ t/pod.t
 t/critic.t
 t/levels.t
 t/log-deep.t
+t/log-deep-read.t
 t/perlcriticrc
 Makefile.PL
 META.yml

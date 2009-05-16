@@ -1,6 +1,6 @@
 ---
 name: Log-Deep
-version: 0.0.6
+version: 0.1.0
 author:
   - 'Ivan Wills <ivan.wills@gmail.com>'
 abstract: Deep Logging of information about a script state
@@ -23,10 +23,10 @@ build_requires:
 provides:
   Log::Deep:
     file: lib/Log/Deep.pm
-    version: 0.0.6
+    version: 0.1.0
   Log::Deep::Read:
     file: lib/Log/Deep/Read.pm
-    version: 0.0.6
+    version: 0.1.0
 generated_by: Module::Build version 0.33
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
