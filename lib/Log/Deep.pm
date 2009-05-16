@@ -18,7 +18,7 @@ use POSIX qw/strftime/;
 use English qw/ -no_match_vars /;
 use base qw/Exporter/;
 
-our $VERSION     = version->new('0.0.6');
+our $VERSION     = version->new('0.1.0');
 
 Readonly my @LOG_LEVELS => qw/info message debug warn error fatal/;
 
@@ -381,7 +381,7 @@ Log::Deep - Deep Logging of information about a script state
 
 =head1 VERSION
 
-This documentation refers to Log::Deep version 0.0.6.
+This documentation refers to Log::Deep version 0.1.0.
 
 
 =head1 SYNOPSIS
