@@ -18,3 +18,4 @@ t/log-deep.t
 t/perlcriticrc
 Makefile.PL
 META.yml
+LICENSE

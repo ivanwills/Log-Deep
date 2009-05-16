@@ -1,26 +1,33 @@
 ---
 name: Log-Deep
-version: 0.0.5
+version: 0.0.6
 author:
   - 'Ivan Wills <ivan.wills@gmail.com>'
 abstract: Deep Logging of information about a script state
 license: perl
 resources:
   license: http://dev.perl.org/licenses/
-build_requires:
+requires:
   Clone: 0.29
   Data::Dump::Streamer: 2.08
   Readonly: 1.03
-  Test::More: 0
   Time::HiRes: 1.9711
+build_requires:
+  Test::Kwalitee: 0
+  Test::More: 0
+  Test::NoWarnings: 0
+  Test::Perl::Critic: 0
+  Test::Pod: 0
+  Test::Pod::Coverage: 0
+  Test::Spelling: 0
 provides:
   Log::Deep:
     file: lib/Log/Deep.pm
-    version: 0.0.5
+    version: 0.0.6
   Log::Deep::Read:
     file: lib/Log/Deep/Read.pm
-    version: 0.0.5
-generated_by: Module::Build version 0.32
+    version: 0.0.6
+generated_by: Module::Build version 0.33
 meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.2.html
-  version: 1.2
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4

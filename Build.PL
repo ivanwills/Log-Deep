@@ -24,6 +24,7 @@ my $builder = Module::Build->new(
 	},
 	add_to_cleanup      => [ 'Log-Deep-*' ],
 	create_makefile_pl  => 'traditional',
+	create_license      => 1,
 );
 
 $builder->create_build_script();
