@@ -249,8 +249,9 @@ sub parse_line {
 
 	# un-quote the individual columns
 	for my $col (@log) {
-		$col =~ s/ (?<!\\) \\n /\n/gxms;
 		$col =~ s/ \\ \\ /\\/gxms;
+		$col =~ s/ (?<!\\) \\n /\n/gxms;
+		$col =~ s/ (?<!\\) \\, /,/gxms;
 	}
 
 	# re-process the data so we can display what is needed.
