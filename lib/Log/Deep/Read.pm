@@ -290,7 +290,7 @@ sub display_line {
 	$self->{last_line_time} = $now;
 
 	# construct the log line determining colours to use etc
-	$level = $self->{mono} > $level : colored $level, $LEVEL_COLOURS->{$level};
+	$level = $self->{mono} ? $level : colored $level, $LEVEL_COLOURS->{$level};
 	$out .= $self->{mono} ? $self->session_colour($session) : color $self->session_colour($session);
 	$out .= "[$time]";
 
@@ -453,27 +453,27 @@ Arg: C<number> - int - The number of lines to display from the end of the log fi
 Arg: C<session-number> - int - The number of sessions to display from the end of the file
 
 Arg: C<display> - hash ref - keys are the keys of the log's data to display
-if a true value (or hide if false). The values can also be a comma seperated
+if a true value (or hide if false). The values can also be a comma separated
 list (or an array reference) to turn on displaying of sub keys of the field
 (requires the filed to be a hash)
 
-Arg: C<filter> - hash ref - specifys the keys to filter (not yet implemented)
+Arg: C<filter> - hash ref - specifies the keys to filter (not yet implemented)
 
 Arg: C<verbose> - bool - Turn on showing more verbose log messages.
 
 Arg: C<short_break> - bool - Turn on showing a short break when some time has
 passed between displaying log lines (when follow is true)
 
-Arg: C<short_lines> - int - the number lines to pring out when a short time
+Arg: C<short_lines> - int - the number lines to print out when a short time
 threshold has been exceeded.
 
 Arg: C<long_break> - bool - Turn on showing a short break when a longer time has
 passed between displaying log lines (when follow is true)
 
-Arg: C<long_lines> - int - the number lines to pring out when a longer time
+Arg: C<long_lines> - int - the number lines to print out when a longer time
 threshold has been exceeded.
 
-Arg: C<sessions_max> - int - The maximum number of sessions to keeep before
+Arg: C<sessions_max> - int - The maximum number of sessions to keep before
 starting to remove older sessions
 
 Return: Log::Deep::Read - A new Log::Deep::Read object
