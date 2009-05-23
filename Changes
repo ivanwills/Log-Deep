@@ -1,5 +1,15 @@
 Revision history for Log-Deep
 
-0.01    Date/time
+0.2.0   2009-05-23
+        Many stability improvements
+        Improved test coverage, particularly of Log::Deep::Read
+        Improved Documentation
+0.1.0   2009-05-16
+        Catalyst API compatibly synchronisation
+0.0.6   2009-05-11
+        Minor bug fix
+0.0.5   2009-05-12
+        Stuff happened
+0.0.1   2009-05-
         First version, released on an unsuspecting world.
 

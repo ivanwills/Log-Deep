@@ -12,6 +12,8 @@ my $builder = Module::Build->new(
 		'Readonly'             => '1.03',
 		'Time::HiRes'          => '1.9711',
 		'Clone'                => '0.29',
+		'List::MoreUtils'      => 0,
+		'Term::ANSIColor'      => 0,
 	},
 	build_requires      => {
 		'Test::More'           => 0,
