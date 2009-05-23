@@ -23,10 +23,10 @@ build_requires:
 provides:
   Log::Deep:
     file: lib/Log/Deep.pm
-    version: 0.1.0
+    version: 0.2.0
   Log::Deep::Read:
     file: lib/Log/Deep/Read.pm
-    version: 0.1.0
+    version: 0.2.0
 generated_by: Module::Build version 0.33
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
