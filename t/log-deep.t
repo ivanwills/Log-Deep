@@ -2,9 +2,10 @@
 
 use strict;
 use warnings;
-use Test::More tests => 19 + 1;
+use Test::More tests => 20 + 1;
 use Test::NoWarnings;
 use Test::Warn;
+use Test::Exception;
 use Data::Dumper qw/Dumper/;
 
 use File::Slurp qw/slurp/;
@@ -30,18 +31,11 @@ $found_length    = log_length($deep);
 
 is( $found_length, $expected_length, 'Checking that session writes one log line');
 
-SKIP: {
-	skip "Need to work out how to fatal testing working with out exiting", 1;
+dies_ok { $deep->fatal('test') } "Fatal dies";
+$expected_length = $found_length + 1;
+$found_length    = log_length($deep);
 
-	warn Dumper my $exit = \*Log::Deep::exit;
-	*Log::Deep::exit = sub {};
-	$deep->fatal('test');
-	*Log::Deep::exit = $exit;
-	$expected_length = $found_length + 1;
-	$found_length    = log_length($deep);
-
-	is( $found_length, $expected_length, 'Checking that fatal writes one log line');
-}
+is( $found_length, $expected_length, 'Checking that fatal writes one log line');
 
 $deep->error('test');
 $expected_length = $found_length + 1;

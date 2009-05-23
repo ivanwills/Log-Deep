@@ -9,7 +9,7 @@ package Log::Deep;
 use strict;
 use warnings;
 use version;
-use Carp qw/longmess/;
+use Carp qw/croak longmess/;
 use List::MoreUtils qw/any/;
 use Readonly;
 use Clone qw/clone/;
@@ -154,7 +154,9 @@ sub fatal {
 
 	$self->record(@params);
 
-	return exit(1);
+	croak join ' ', @params[ 1 .. @params -1 ];
+
+	return;
 }
 
 sub security {
