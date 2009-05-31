@@ -233,7 +233,7 @@ Param: C<$options> - hash ref - Configuration options for this line
 
 Param: C<$line> - string - The original text of the log line
 
-Param: C<$file> - Log::Deep::File - Object contining the log file of interest
+Param: C<$file> - Log::Deep::File - Object continuing the log file of interest
 
 Return: Log::Deep::Line - New log deep object
 
@@ -243,7 +243,7 @@ Description: Create a new object from a line (C<$line>) of the log file (C<$file
 
 Param: C<$line> - string - The original text of the log line
 
-Param: C<$file> - Log::Deep::File - Object contining the log file of interest
+Param: C<$file> - Log::Deep::File - Object continuing the log file of interest
 
 Description: Parses the log line
 
@@ -274,7 +274,7 @@ Description: Determines if the log line should be shown.
 
 Return: The processed text of the line (sans the DATA section).
 
-Description: Processes log line for out puting to a terminal.
+Description: Processes log line for out putting to a terminal.
 
 =head3 C<data ( )>
 
