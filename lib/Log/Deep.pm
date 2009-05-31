@@ -19,7 +19,7 @@ use Fcntl qw/SEEK_END/;
 use English qw/ -no_match_vars /;
 use base qw/Exporter/;
 
-our $VERSION     = version->new('0.2.0');
+our $VERSION     = version->new('0.3.0');
 
 Readonly my @LOG_LEVELS => qw/info message debug warn error fatal/;
 
@@ -424,7 +424,7 @@ Log::Deep - Deep Logging of information about a script state
 
 =head1 VERSION
 
-This documentation refers to Log::Deep version 0.2.0.
+This documentation refers to Log::Deep version 0.3.0.
 
 
 =head1 SYNOPSIS

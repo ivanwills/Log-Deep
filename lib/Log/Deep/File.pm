@@ -19,7 +19,7 @@ use English qw/ -no_match_vars /;
 use base qw/Exporter/;
 use overload '""' => \&name;
 
-our $VERSION     = version->new('0.0.1');
+our $VERSION     = version->new('0.3.0');
 our @EXPORT_OK   = qw//;
 our %EXPORT_TAGS = ();
 
@@ -77,8 +77,7 @@ Log::Deep::File - <One-line description of module's purpose>
 
 =head1 VERSION
 
-This documentation refers to Log::Deep::File version 0.1.
-
+This documentation refers to Log::Deep::File version 0.3.0.
 
 =head1 SYNOPSIS
 
