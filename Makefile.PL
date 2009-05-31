@@ -13,6 +13,7 @@ WriteMakefile
                            'Data::Dump::Streamer' => '2.08',
                            'Test::Spelling' => 0,
                            'Test::Pod::Coverage' => 0,
+                           'Term::ANSIColor' => 0,
                            'Time::HiRes' => '1.9711',
                            'Test::NoWarnings' => 0,
                            'Readonly' => '1.03',
@@ -20,7 +21,8 @@ WriteMakefile
                            'Test::Perl::Critic' => 0,
                            'Test::More' => 0,
                            'Clone' => '0.29',
-                           'Test::Kwalitee' => 0
+                           'Test::Kwalitee' => 0,
+                           'List::MoreUtils' => 0
                          }
         )
 ;

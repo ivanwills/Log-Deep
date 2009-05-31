@@ -17,8 +17,6 @@ my $builder = Module::Build->new(
 	},
 	build_requires      => {
 		'Test::More'           => 0,
-		'Test::Perl::Critic'   => 0,
-		'Test::Kwalitee'       => 0,
 		'Test::Pod'            => 0,
 		'Test::Pod::Coverage'  => 0,
 		'Test::Spelling'       => 0,
