@@ -18,10 +18,8 @@ WriteMakefile
                            'Test::NoWarnings' => 0,
                            'Readonly' => '1.03',
                            'Test::Pod' => 0,
-                           'Test::Perl::Critic' => 0,
                            'Test::More' => 0,
                            'Clone' => '0.29',
-                           'Test::Kwalitee' => 0,
                            'List::MoreUtils' => 0
                          }
         )

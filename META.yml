@@ -15,10 +15,8 @@ requires:
   Term::ANSIColor: 0
   Time::HiRes: 1.9711
 build_requires:
-  Test::Kwalitee: 0
   Test::More: 0
   Test::NoWarnings: 0
-  Test::Perl::Critic: 0
   Test::Pod: 0
   Test::Pod::Coverage: 0
   Test::Spelling: 0
