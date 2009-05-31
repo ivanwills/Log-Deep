@@ -140,7 +140,10 @@ sub error {
 
 	$params[0]{-level} = 'error';
 
-	return $self->record(@params);
+	my $ans = $self->record(@params);
+	$self->flush;
+
+	return $ans;
 }
 
 sub fatal {
@@ -240,17 +243,17 @@ sub log_handle {
 
 		# guarentee that there is a new line before we start writing
 		my $missing = 0;
-		if ( -s $file ) {
+		if ( !$self->{reopening} && -s $file ) {
 			open my $fh, '<', $file or die "Could not open the log file $file to check that it ends in a new line: $OS_ERROR\n";
-			seek $fh, -2, SEEK_END;
+			seek $fh, -20, SEEK_END;
 			my $end = <$fh>;
 			$missing = $end =~ /\n$/;
 			close $fh;
 		}
 
 		open my $fh, '>>', $file or die "Could not open log file $file: $!\n";
-		$self->{log_file} = $file;
-		$self->{handle}   = $fh;
+		$self->{file}   = $file;
+		$self->{handle} = $fh;
 
 		if ($missing) {
 			print {$fh} "\n";
@@ -360,7 +363,7 @@ sub is_security { return 1                        }
 sub file {
 	my ($self) = @_;
 
-	return $self->{log_file};
+	return $self->{file};
 }
 
 sub catch_warnings {
@@ -387,6 +390,18 @@ sub catch_warnings {
 	}
 
 	return $self->{old_warn_handle} && 1;
+}
+
+sub flush {
+	my ($self) = @_;
+
+	return if ! exists $self->{handle};
+
+	close $self->{handle};
+	delete $self->{handle};
+	$self->{reopening} = 1;
+
+	return;
 }
 
 sub DESTROY {
@@ -633,6 +648,10 @@ Param: C<$action> - 1 | 0 | undef - Set catch warnings (1), unset catch warnings
 Return: bool - True if currently catching warnings, false if not
 
 Description: Turns on/off catching warnings and/or returns the current warn catching state.
+
+=head3 C<flush ()>
+
+Description: Calls IO::Handle's flush on the log file handle
 
 =head1 DIAGNOSTICS
 
