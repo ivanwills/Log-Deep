@@ -73,7 +73,7 @@ __END__
 
 =head1 NAME
 
-Log::Deep::File - <One-line description of module's purpose>
+Log::Deep::File - Object for keeping track of info related to a log file.
 
 =head1 VERSION
 
@@ -83,87 +83,58 @@ This documentation refers to Log::Deep::File version 0.3.0.
 
    use Log::Deep::File;
 
-   # Brief but working code example(s) here showing the most common usage(s)
-   # This section will be as far as many users bother reading, so make it as
-   # educational and exemplary as possible.
+   # Create a new object
+   my $file = Log::Deep::File->new('deep.log');
 
+   # read the log file
+   while ( my $line = $file->line ) {
+       # so stuff
+       ...
+   }
+
+   # use the file name in a string
+   print "Finished reading the file '$file'\n";
+
+   # reset the handle so that we can start again
+   $file->reset;
 
 =head1 DESCRIPTION
 
 =head1 SUBROUTINES/METHODS
 
-=cut
+=head3 C<new ( $name )>
 
-=head3 C<new ( $search, )>
+Param: C<$name> - string - The log file name to be tracked
 
-Param: C<$search> - type (detail) - description
+Return: Log::Deep::File - A new object
 
-Return: Log::Deep::File -
+Description: Creates a new object and opens the specified file.
 
-Description:
+=head3 C<line ( )>
 
-=head3 C<line ( $search, )>
+Return: The next line read from the log file or undef if the end of the file
+has been reached
 
-Param: C<$search> - type (detail) - description
+Description: Reads the next line of the log file.
 
-Return: Log::Deep::File -
+=head3 C<name ( )>
 
-Description:
+Return: The name of the log file
 
-=head3 C<name ( $search, )>
+=head3 C<reset ( )>
 
-Param: C<$search> - type (detail) - description
-
-Return: Log::Deep::File -
-
-Description:
-
-=head3 C<reset ( $search, )>
-
-Param: C<$search> - type (detail) - description
-
-Return: Log::Deep::File -
-
-Description:
+Description: Resets the file handle so that it can be attempted to be read
+again at a later time.
 
 =head1 DIAGNOSTICS
 
-A list of every error and warning message that the module can generate (even
-the ones that will "never happen"), with a full explanation of each problem,
-one or more likely causes, and any suggested remedies.
-
 =head1 CONFIGURATION AND ENVIRONMENT
-
-A full explanation of any configuration system(s) used by the module, including
-the names and locations of any configuration files, and the meaning of any
-environment variables or properties that can be set. These descriptions must
-also include details of any configuration language used.
 
 =head1 DEPENDENCIES
 
-A list of all of the other modules that this module relies upon, including any
-restrictions on versions, and an indication of whether these required modules
-are part of the standard Perl distribution, part of the module's distribution,
-or must be installed separately.
-
 =head1 INCOMPATIBILITIES
 
-A list of any modules that this module cannot be used in conjunction with.
-This may be due to name conflicts in the interface, or competition for system
-or program resources, or due to internal limitations of Perl (for example, many
-modules that use source code filters are mutually incompatible).
-
 =head1 BUGS AND LIMITATIONS
-
-A list of known problems with the module, together with some indication of
-whether they are likely to be fixed in an upcoming release.
-
-Also, a list of restrictions on the features the module does provide: data types
-that cannot be handled, performance issues and the circumstances in which they
-may arise, practical limitations on the size of data sets, special cases that
-are not (yet) handled, etc.
-
-The initial template usually just has:
 
 There are no known bugs in this module.
 
@@ -174,7 +145,6 @@ Patches are welcome.
 =head1 AUTHOR
 
 Ivan Wills - (ivan.wills@gmail.com)
-<Author name(s)>  (<contact address>)
 
 =head1 LICENSE AND COPYRIGHT
 

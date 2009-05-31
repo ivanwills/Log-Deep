@@ -220,111 +220,77 @@ This documentation refers to Log::Deep::Line version 0.3.0.
 
    use Log::Deep::Line;
 
-   # Brief but working code example(s) here showing the most common usage(s)
-   # This section will be as far as many users bother reading, so make it as
-   # educational and exemplary as possible.
-
+   # create a new line object
+   my $line = Log::Deep::Line->new( { show => {}, ... }, $line_text, $file );
 
 =head1 DESCRIPTION
 
 =head1 SUBROUTINES/METHODS
 
-=cut
+=head3 C<new ( $options, $line, $file )>
 
-=head3 C<new ( $search, )>
+Param: C<$options> - hash ref - Configuration options for this line
 
-Param: C<$search> - type (detail) - description
+Param: C<$line> - string - The original text of the log line
 
-Return: Log::Deep::Line -
+Param: C<$file> - Log::Deep::File - Object contining the log file of interest
 
-Description:
+Return: Log::Deep::Line - New log deep object
 
-=head3 C<parse ( $search, )>
+Description: Create a new object from a line (C<$line>) of the log file (C<$file>)
 
-Param: C<$search> - type (detail) - description
+=head3 C<parse ( $line, $file )>
 
-Return: Log::Deep::Line -
+Param: C<$line> - string - The original text of the log line
 
-Description:
+Param: C<$file> - Log::Deep::File - Object contining the log file of interest
 
-=head3 C<id ( $search, )>
+Description: Parses the log line
 
-Param: C<$search> - type (detail) - description
+=head3 C<id ( )>
 
-Return: Log::Deep::Line -
+Return: The session id for this log line
 
-Description:
+Description: Gets the session id for the log line. Will be undef if the log
+line did not parse correctly.
 
-=head3 C<colour ( $search, )>
+=head3 C<colour ( [ $colour ] )>
 
-Param: C<$search> - type (detail) - description
+Param: C<$colour> - string - A string containing the foreground and background
+colour to use for this line. The format is 'I<colour> on_I<colour>'.
 
-Return: Log::Deep::Line -
+Return: string - The colour set for this log line
 
-Description:
+Description: Gets the current colour for this log line and optionally sets the
+colour.
 
-=head3 C<show ( $search, )>
+=head3 C<show ( )>
 
-Param: C<$search> - type (detail) - description
+Return: bool - True if the log line should be shown.
 
-Return: Log::Deep::Line -
+Description: Determines if the log line should be shown.
 
-Description:
+=head3 C<text ( )>
 
-=head3 C<text ( $search, )>
+Return: The processed text of the line (sans the DATA section).
 
-Param: C<$search> - type (detail) - description
+Description: Processes log line for out puting to a terminal.
 
-Return: Log::Deep::Line -
+=head3 C<data ( )>
 
-Description:
+Return: The contents of the DATA section as specified by the display option
 
-=head3 C<data ( $search, )>
-
-Param: C<$search> - type (detail) - description
-
-Return: Log::Deep::Line -
-
-Description:
+Description: Out puts the DATA section of the log line.
 
 =head1 DIAGNOSTICS
 
-A list of every error and warning message that the module can generate (even
-the ones that will "never happen"), with a full explanation of each problem,
-one or more likely causes, and any suggested remedies.
-
 =head1 CONFIGURATION AND ENVIRONMENT
-
-A full explanation of any configuration system(s) used by the module, including
-the names and locations of any configuration files, and the meaning of any
-environment variables or properties that can be set. These descriptions must
-also include details of any configuration language used.
 
 =head1 DEPENDENCIES
 
-A list of all of the other modules that this module relies upon, including any
-restrictions on versions, and an indication of whether these required modules
-are part of the standard Perl distribution, part of the module's distribution,
-or must be installed separately.
-
 =head1 INCOMPATIBILITIES
 
-A list of any modules that this module cannot be used in conjunction with.
-This may be due to name conflicts in the interface, or competition for system
-or program resources, or due to internal limitations of Perl (for example, many
-modules that use source code filters are mutually incompatible).
-
 =head1 BUGS AND LIMITATIONS
-
-A list of known problems with the module, together with some indication of
-whether they are likely to be fixed in an upcoming release.
-
-Also, a list of restrictions on the features the module does provide: data types
-that cannot be handled, performance issues and the circumstances in which they
-may arise, practical limitations on the size of data sets, special cases that
-are not (yet) handled, etc.
-
-The initial template usually just has:
 
 There are no known bugs in this module.
 
@@ -335,7 +301,6 @@ Patches are welcome.
 =head1 AUTHOR
 
 Ivan Wills - (ivan.wills@gmail.com)
-<Author name(s)>  (<contact address>)
 
 =head1 LICENSE AND COPYRIGHT
 
