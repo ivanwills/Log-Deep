@@ -6,6 +6,8 @@ README
 bin/deep
 lib/Log/Deep.pm
 lib/Log/Deep/Read.pm
+lib/Log/Deep/File.pm
+lib/Log/Deep/Line.pm
 t/00-load.t
 t/pod-coverage.t
 t/boilerplate.t
@@ -16,6 +18,7 @@ t/critic.t
 t/levels.t
 t/log-deep.t
 t/log-deep-read.t
+t/log-deep-line.t
 t/perlcriticrc
 Makefile.PL
 META.yml
