@@ -67,6 +67,7 @@ sub new {
 sub read_files {
 	my ($self, @files) = @_;
 	my $once = 1;
+	my $read = 5;
 	my %files = map {$_ => Log::Deep::File->new($_)} map { sort glob $_ } @files;
 
 	# record the current number of files watched
@@ -77,6 +78,10 @@ sub read_files {
 	while ( $self->{follow} || $once == 1 ) {
 		# increment $once to keep track of the itteration number
 		$once++;
+		my $lines = 0;
+		if ($read < 1) {
+			$read = 1;
+		}
 
 		# itterate over each file found/specified
 		FILE:
@@ -84,7 +89,8 @@ sub read_files {
 			next FILE if !$file;
 
 			# process the file for any (new) log lines
-			if ( !$self->read_file($files{$file}) ) {
+			$lines += $self->read_file($files{$file});
+			if ( !$files{$file}->{handle} ) {
 				# delete the file if there was nothing to read
 				delete $files{$file};
 			}
@@ -100,7 +106,7 @@ sub read_files {
 		# every 1,000 itterations check if there are any new files matching
 		# any passed globs in, allows not having to re-run every time a new
 		# log file is created.
-		if ( $once % 1_000 ) {
+		if ( $once % 1_000 || !%files ) {
 			for my $file ( map { sort glob $_ } @files ) {
 				# check that the file still exists
 				next if !-e $file;
@@ -112,11 +118,19 @@ sub read_files {
 			# record the current number of files watched
 			$self->{file_count} = keys %files;
 		}
-		else {
+		elsif ( $self->{follow} ) {
+			$read += $lines ? 1 : -1;
+			my $multiplier =
+				  $lines ? 1
+				: !$read ? 5
+				:          2;
 			# sleep every time we have cycled through all the files to
 			# reduce CPU load.
-			sleep 0.5;
+			sleep $self->{sleep_time} * $multiplier;
 		}
+
+		# exit the loop if all log files have been deleted
+		last if !%files;
 	}
 
 	return;
@@ -126,6 +140,7 @@ sub read_file {
 	my ($self, $file) = @_;
 	my @lines;
 	my %sessions;
+	my $line_count = 0;
 
 	# read the rest of the lines in the file
 	LINE:
@@ -133,6 +148,7 @@ sub read_file {
 
 		chomp $line;
 		next if !$line;
+		$line_count++;
 
 		# parse the line
 		my $line = Log::Deep::Line->new( { %{ $self->{line} } }, $line, $file );

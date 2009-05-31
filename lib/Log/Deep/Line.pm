@@ -75,10 +75,11 @@ sub parse {
 	# re-process the data so we can display what is needed.
 	my $DATA;
 	if ( $log[-1] =~ /;$/xms ) {
+		local $SIG{__WARN__} = sub {};
 		eval $log[-1];  ## no critic
 	}
 	else {
-		warn "There appears to be a problem with the data";
+		warn 'There appears to be a problem with the data on line ' . $file->{handle}->input_line_number . "\n";
 		$DATA = {};
 	}
 
