@@ -13,23 +13,14 @@ use Carp;
 use Data::Dump::Streamer;
 use English qw/ -no_match_vars /;
 use Readonly;
-use Term::ANSIColor;
 use Time::HiRes qw/sleep/;
 use base qw/Exporter/;
+use Log::Deep::File;
+use Log::Deep::Line;
 
 our $VERSION     = version->new('0.2.0');
 our @EXPORT_OK   = qw//;
 our %EXPORT_TAGS = ();
-
-Readonly my $LEVEL_COLOURS => {
-		info     => '',
-		message  => '',
-		debug    => '',
-		warn  => 'yellow',
-		error    => 'red',
-		fatal    => 'bold red',
-		security => '',
-	};
 
 Readonly my @colours => qw/
 	black
@@ -61,13 +52,22 @@ sub new {
 
 	$self->{dump} = Data::Dump::Streamer->new()->Indent(4);
 
+	$self->{line} = {
+		verbose => $self->{verbose},
+		display => $self->{display},
+		show    => $self->{show},
+	};
+
+	delete $self->{show};
+	delete $self->{display};
+
 	return $self;
 }
 
 sub read_files {
 	my ($self, @files) = @_;
 	my $once = 1;
-	my %files = map {$_ => { name => $_ }} map { sort glob $_ } @files;
+	my %files = map {$_ => Log::Deep::File->new($_)} map { sort glob $_ } @files;
 
 	# record the current number of files watched
 	$self->{file_count} = keys %files;
@@ -79,7 +79,10 @@ sub read_files {
 		$once++;
 
 		# itterate over each file found/specified
+		FILE:
 		for my $file (keys %files) {
+			next FILE if !$file;
+
 			# process the file for any (new) log lines
 			if ( !$self->read_file($files{$file}) ) {
 				# delete the file if there was nothing to read
@@ -112,7 +115,7 @@ sub read_files {
 		else {
 			# sleep every time we have cycled through all the files to
 			# reduce CPU load.
-			sleep 0.1;
+			sleep 0.5;
 		}
 	}
 
@@ -124,37 +127,26 @@ sub read_file {
 	my @lines;
 	my %sessions;
 
-	# check that we got an actual file
-	return if !$file->{name} || !-f $file->{name};
-
-	# check if we have a cached file handle for this file
-	if (!$file->{handle}) {
-		# open up the file
-		open $file->{handle}, '<', $file->{name} or warn "Could not open $file->{name}: $!\n" and return;
-	}
-
-	my $fh = $file->{handle};
-
 	# read the rest of the lines in the file
 	LINE:
-	while (my $line = <$fh>) {
-		while ( $line !~ /\n$/xms ) {
-			# guarentee that we have a full log line, ie if we read a line before it has been completely written
-			$line .= <$fh>;
-		}
+	while (my $line = $file->line) {
+
+		chomp $line;
+		next if !$line;
 
 		# parse the line
-		my @line = $self->parse_line( $line, $file );
+		my $line = Log::Deep::Line->new( { %{ $self->{line} } }, $line, $file );
+		$line->colour( $self->session_colour($line->id) );
 
 		# skip displaying the line if it should be filtered out
-		next LINE if !$self->show_line(@line);
+		next LINE if !$line->show();
 
 		# get the display text for the line
-		my $line_text = eval { $self->display_line(@line) };
+		my $line_text = eval { $line->text() . join '', $line->data() };
 
 		# check that there were no errors
 		if ($EVAL_ERROR) {
-			# print the errors
+			# warn the errors
 			warn $EVAL_ERROR;
 
 			# go on to the next line
@@ -168,7 +160,7 @@ sub read_file {
 		}
 		elsif ( $self->{'session-number'} ) {
 			# get the session id
-			my $session = $line[1];
+			my $session = $line->id;
 
 			# add the session to the list of session if we have not already come accross it
 			push @lines, $session if !$sessions{$session};
@@ -178,7 +170,7 @@ sub read_file {
 			$sessions{$session}  .= $line_text;
 		}
 		else {
-			# print any file change info
+			# show any file change info
 			$self->changed_file($file);
 
 			# print out the log line
@@ -205,20 +197,49 @@ sub read_file {
 		}
 	}
 
-	# reset the file handle so that it can be read again;
-	seek $file->{handle}, 0, 1;
+	$file->reset;
 
 	return $file->{handle};
+}
+
+sub read {
+	my ($self) = @_;
+	my @lines;
+	my %sessions;
+	my $file = $self->{file};
+
+	if (!ref $file) {
+		$file = $self->{file} = Log::Deep::File->new($file);
+	}
+
+	my $line = $file->line;
+
+	if ( !$line ) {
+		$file->reset;
+		return;
+	}
+
+	chomp $line;
+	return $self->read() if !$line;
+
+	# parse the line
+	$line = Log::Deep::Line->new( { %{ $self->{line} } }, $line, $file );
+	$line->colour( $self->session_colour($line->id) );
+
+	# skip displaying the line if it should be filtered out
+	return $self->read if !$line->show();
+
+	return $line;
 }
 
 sub changed_file {
 	my ( $self, $file ) = @_;
 
 	# check if we have printed some lines from this file before
-	if ( !$self->{last_print_file} || $self->{last_print_file} ne $file ) {
+	if ( !$self->{last_print_file} || "$self->{last_print_file}" ne "$file" ) {
 		if ( $self->{file_count} > 1 ) {
 			# print out the change in file (same format as tail)
-			print "\n==> $file->{name} <==\n";
+			print "\n==> $file <==\n";
 		}
 
 		# set this file as the last printed file
@@ -226,136 +247,6 @@ sub changed_file {
 	}
 
 	return;
-}
-
-sub parse_line {
-	my ($self, $line, $file) = @_;
-
-	# split the line into 5 parts
-	# TODO this might cause some problems if the message happens to have a \, in it
-	my @log = split /(?<!\\),/, $line, 5;
-
-	if ( @log != 5 && $self->{verbose} ) {
-		# get the file name and line number
-		my $name    = $file->{name};
-		my $line_no = $file->{handle}->input_line_number;
-
-		# print out the warnings about the bad line
-		warn "The log $name line ($line_no) did not contain 4 columns! Got ". (scalar @log) . " columns\n";
-		warn $line if $self->{verbose} > 1;
-	}
-
-	# un-quote the individual columns
-	for my $col (@log) {
-		$col =~ s/ \\ \\ /\\/gxms;
-		$col =~ s/ (?<!\\) \\n /\n/gxms;
-		$col =~ s/ (?<!\\) \\, /,/gxms;
-	}
-
-	# re-process the data so we can display what is needed.
-	my $DATA;
-	if ( $log[-1] =~ /;$/xms ) {
-		eval $log[-1];  ## no critic
-	}
-	else {
-		warn "There appears to be a problem with the data";
-		$DATA = {};
-	}
-
-	return (@log[0..3], $DATA);
-}
-
-sub show_line {
-	my ($self, $time, $session, $level, $message, $data) = @_;
-
-	# TODO add real filtering body here
-	return 0 if !$time || !$session || !$data;
-
-	return 1;
-}
-
-sub display_line {
-	my ($self, $time, $session, $level, $message, $data) = @_;
-	my $out = '';
-
-	my $last = $self->{last_line_time} || 0;
-	my $now  = time;
-
-	# check if we are putting line breaks when there is a large time between followed file output
-	if ( $self->{breaks} && $now > $last + $self->{short_break} ) {
-		my $lines = $now > $last + $self->{long_break} ? $self->{long_lines} : $self->{short_lines};
-		$out .= "\n" x $lines;
-	}
-	$self->{last_line_time} = $now;
-
-	# construct the log line determining colours to use etc
-	$level = $self->{mono} ? $level : colored $level, $LEVEL_COLOURS->{$level};
-	$out .= $self->{mono} ? $self->session_colour($session) : color $self->session_colour($session);
-	$out .= "[$time]";
-
-	if ( !$self->{verbose} ) {
-		# add the session id if the user cares
-		$out .= " $session";
-	}
-	if ( !$self->{mono} ) {
-		# reset the colour if we are not in mono
-		$out .= color 'reset';
-	}
-
-	# finish constructing the log line
-	$out .= " $level - $message\n";
-	$out .= $self->display_data($data);
-
-	return $out;
-}
-
-sub display_data {
-	my ($self, $data) = @_;
-	my $display = $self->{display};
-	my $out     = '';
-
-	# check for any fields that should be displayed
-	FIELD:
-	for my $field ( sort keys %{ $display } ) {
-		if ( ref $display->{$field} eq 'ARRAY' || $display->{$field} ne 1 ) {
-			# print the specified sub keys of $field
-
-			if ( !ref $display->{$field} ) {
-				# convert the display field into an array so that we can print it's sub fields
-				$display->{$field} = [ split /,/, $display->{$field} ];
-			}
-
-			# out put each named sub field of $field
-			for my $sub_field ( @{ $display->{$field} } ) {
-				$out .= $self->{dump}->Names( $field . '_' . $sub_field )->Data( $data->{$field}{$sub_field} )->Out();
-			}
-		}
-		elsif (
-			$display->{$field} eq 0        # field explicitly set to false
-			|| !defined $display->{$field} # or explicitly undefined
-			|| (
-				$field eq 'data'           # the field is data
-				&& !%{ $data->{data} }     # and there is not data
-			)
-		) {
-			# skip this field
-			next FIELD;
-		}
-		elsif ( !ref $data->{$field} ) {
-			# out put scalar values with out the DDS formatting
-			$out .= "\$$field = $data->{$field}";
-
-			# safely guarentee that there is a new line at the end of this line
-			chomp $out;
-			$out .= "\n";
-		}
-		else {
-			# out put the field normally
-			$out .= $self->{dump}->Names($field)->Data($data->{$field})->Out();
-		}
-	}
-
-	return $out;
 }
 
 sub session_colour {
@@ -418,6 +309,15 @@ sub session_colour {
 1;
 
 __END__
+
+for file in files
+	for line in file
+		do stuff
+
+'
+for file in files
+	while line = file->next
+		do stuff
 
 =head1 NAME
 
@@ -503,33 +403,12 @@ Param: C<$file> - hash ref - The file currently being examined
 Description: Prints a message to the user that the current log file has
 changed to a new file. The format is the same as for the tail command.
 
-=head3 C<parse_line ( $line )>
+=head3 C<read ()>
 
-Param: C<$line> - string - Line from a Log::Deep log file
+Return: Log::Deep::Line - The next line read or undef if no more lines in file
 
-Return: Array - The elements of the log line
-
-Description: Parses the log line and returns the data that the is stored on
-the log line.
-
-=head3 C<show_line ( $time, $session, $level, $message, $data )>
-
-Params: The data for the current log line
-
-Description: Determines if a line should be shown or not (checks the line against the filter)
-
-=head3 C<display_line ( $time, $session, $level, $message, $data )>
-
-Params: The data for the current log line
-
-Description: Actually prints out the line, colouring the out put as necessary.
-
-=head3 C<display_data ( $data )>
-
-Param: C<$data> - hash ref - The data to be displayed
-
-Description: Displays the log lines data based on the display rules set up
-when the object was created.
+Description: Just parses the next line in the log file (skips blank lines and
+lines that are filtered out)
 
 =head3 C<session_colour ( $session_id )>
 
