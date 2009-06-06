@@ -157,14 +157,23 @@ sub data {
 	my $display = $self->{display};
 	my @fields;
 	my @out;
-	my $data = $self->{data};
+	my $data = $self->{DATA};
+
+	$display->{data} = defined $display->{data} ? $display->{data} : 1;
 
 	# check for any fields that should be displayed
 	FIELD:
 	for my $field ( sort keys %{ $display } ) {
-		if ( ref $display->{$field} eq 'ARRAY' || $display->{$field} ne 1 ) {
-			# select the specified sub keys of $field
+		if ( $display->{$field} eq 0 ) {
+			# skip this field
+			next FIELD;
+		}
+		elsif ( !defined $display->{$field} ) {
+			push @out, "\$$field = " . (exists $display->{field} ? 'undef' : 'missing') . "\n" if $field ne 'data';
+		}
+		elsif ( ref $display->{$field} eq 'ARRAY' || $display->{$field} ne 1 ) {
 
+			# select the specified sub keys of $field
 			if ( !ref $display->{$field} ) {
 				# convert the display field into an array so that we can select it's sub fields
 				$display->{$field} = [ split /,/, $display->{$field} ];
@@ -175,29 +184,18 @@ sub data {
 				push @out, $self->{dump}->Names( $field . '_' . $sub_field )->Data( $data->{$field}{$sub_field} )->Out();
 			}
 		}
-		elsif (
-			$display->{$field} eq 0        # field explicitly set to false
-			|| !defined $display->{$field} # or explicitly undefined
-			|| (
-				$field eq 'data'           # the field is data
-				&& !%{ $data->{data} }     # and there is not data
-			)
-		) {
-			# skip this field
-			next FIELD;
-		}
 		elsif ( !ref $data->{$field} ) {
 			# out put scalar values with out the DDS formatting
-			my $out .= "\$$field = $data->{$field}";
+			my $out .= "\$$field = " . ( defined $data->{$field} ? $data->{$field} : 'undef' );
 
 			# safely guarentee that there is a new line at the end of this line
 			chomp $out;
 			$out .= "\n";
 			push @out, $out;
 		}
-		else {
+		elsif ( $field ne 'data' || %{ $data->{$field} } ) {
 			# out put the field normally
-			push @out, $self->{dump}->Names($field)->Data($data->{$field})->Out();
+			push @out, $self->{dump}->Names($field)->Data($data->{$field})->Out() || 'undef';
 		}
 	}
 
