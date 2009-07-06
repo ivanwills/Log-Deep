@@ -49,6 +49,7 @@ sub new {
 	$self->{foreground}   ||= 0;
 	$self->{background}   ||= 0;
 	$self->{sessions_max} ||= 100;
+	$self->{sleep_time}   ||= 0.5;
 
 	$self->{dump} = Data::Dump::Streamer->new()->Indent(4);
 
@@ -56,6 +57,7 @@ sub new {
 		verbose => $self->{verbose},
 		display => $self->{display},
 		show    => $self->{show},
+		dump    => $self->{dump},
 	};
 
 	delete $self->{show};
@@ -68,7 +70,22 @@ sub read_files {
 	my ($self, @files) = @_;
 	my $once = 1;
 	my $read = 5;
-	my %files = map {$_ => Log::Deep::File->new($_)} map { sort glob $_ } @files;
+	my %files;
+
+	for my $file_glob (@files) {
+		my (@files, $warn);
+		{
+			local $SIG{__WARN__} = sub { $warn = $_ };
+			@files = glob $file_glob;
+		}
+
+		next if !@files || $warn;
+
+		for my $file (sort @files) {
+			$files{$file} ||= Log::Deep::File->new($file);
+		}
+	}
+	die "No files to read!" if !keys %files;
 
 	# record the current number of files watched
 	$self->{file_count} = keys %files;
@@ -86,7 +103,7 @@ sub read_files {
 		# itterate over each file found/specified
 		FILE:
 		for my $file (keys %files) {
-			next FILE if !$file;
+			next FILE if !$file || !$files{$file};
 
 			# process the file for any (new) log lines
 			$lines += $self->read_file($files{$file});
@@ -152,6 +169,11 @@ sub read_file {
 
 		# parse the line
 		my $line = Log::Deep::Line->new( { %{ $self->{line} } }, $line, $file );
+
+		# skip lines that don't have a session id
+		next LINE if !$line->id;
+
+		# set the colour for the line
 		$line->colour( $self->session_colour($line->id) );
 
 		# skip displaying the line if it should be filtered out
@@ -173,6 +195,9 @@ sub read_file {
 		if ($self->{number}) {
 			# add the line to end of the lines
 			push @lines, $line_text;
+			if (@lines > 10 * $self->{number}) {
+				@lines = @lines[@lines - $self->{number} - 1 .. @lines - 1];
+			}
 		}
 		elsif ( $self->{'session-number'} ) {
 			# get the session id
@@ -268,7 +293,7 @@ sub changed_file {
 sub session_colour {
 	my ($self, $session_id) = @_;
 
-	die "No session id supplied!" if !$session_id;
+	confess "No session id supplied!" if !$session_id;
 
 	# return the cached session colour if we have one
 	return $self->{sessions}{$session_id}{colour} if $self->{sessions}{$session_id};
