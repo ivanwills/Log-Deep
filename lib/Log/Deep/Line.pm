@@ -164,42 +164,53 @@ sub data {
 	# check for any fields that should be displayed
 	FIELD:
 	for my $field ( sort keys %{ $display } ) {
-		if ( $display->{$field} eq 0 ) {
-			# skip this field
-			next FIELD;
-		}
-		elsif ( !defined $display->{$field} ) {
-			push @out, "\$$field = " . (exists $display->{field} ? 'undef' : 'missing') . "\n" if $field ne 'data';
-		}
-		elsif ( ref $display->{$field} eq 'ARRAY' || $display->{$field} ne 1 ) {
-
-			# select the specified sub keys of $field
-			if ( !ref $display->{$field} ) {
-				# convert the display field into an array so that we can select it's sub fields
-				$display->{$field} = [ split /,/, $display->{$field} ];
-			}
-
-			# out put each named sub field of $field
-			for my $sub_field ( @{ $display->{$field} } ) {
-				push @out, $self->{dump}->Names( $field . '_' . $sub_field )->Data( $data->{$field}{$sub_field} )->Out();
-			}
-		}
-		elsif ( !ref $data->{$field} ) {
-			# out put scalar values with out the DDS formatting
-			my $out .= "\$$field = " . ( defined $data->{$field} ? $data->{$field} : 'undef' );
-
-			# safely guarentee that there is a new line at the end of this line
-			chomp $out;
-			$out .= "\n";
-			push @out, $out;
-		}
-		elsif ( $field ne 'data' || %{ $data->{$field} } ) {
-			# out put the field normally
-			push @out, $self->{dump}->Names($field)->Data($data->{$field})->Out() || 'undef';
-		}
+		push @out, 
+			  $display->{$field} eq 0                                      ? ()
+			: !defined $data->{$field}                                     ? data_missing($field, $data)
+			: ref $display->{$field} eq 'ARRAY' || $display->{$field} ne 1 ? data_sub_fields($field, $data->{$field})
+			: !ref $data->{$field}                                         ? data_scalar($field, $data->{$field})
+			: $field ne 'data' || %{ $data->{$field} }                     ? $self->{dump}->Names($field)->Data($data->{$field})->Out()
+			:                                                                ();
 	}
 
 	return @out;
+}
+
+sub data_missing {
+	my ( $self, $field, $data ) = @_;
+	return if $field eq 'data';
+	return "\$$field = " . (exists $data->{field} ? 'undef' : 'missing') . "\n";
+}
+
+sub data_sub_fields {
+	my ( $self, $field, $data ) = @_;
+	my $display = $self->{display};
+	my @out;
+
+	# select the specified sub keys of $field
+	if ( !ref $display->{$field} ) {
+		# convert the display field into an array so that we can select it's sub fields
+		$display->{$field} = [ split /,/, $display->{$field} ];
+	}
+
+	# out put each named sub field of $field
+	for my $sub_field ( @{ $display->{$field} } ) {
+		push @out, $self->{dump}->Names( $field . '_' . $sub_field )->Data( $data->{$sub_field} )->Out();
+	}
+
+	return @out;
+}
+
+sub data_scalar {
+	my ( $self, $field, $data ) = @_;
+
+	# out put scalar values with out the DDS formatting
+	my $out .= "\$$field = " . ( defined $data ? $data : 'undef' );
+
+	# safely guarentee that there is a new line at the end of this line
+	chomp $out;
+	$out .= "\n";
+	return $out;
 }
 
 1;
@@ -279,6 +290,36 @@ Description: Processes log line for out putting to a terminal.
 Return: The contents of the DATA section as specified by the display option
 
 Description: Out puts the DATA section of the log line.
+
+=head3 C<data_missing ($field, $data)>
+
+Param: C<$field> - string - The name of the field of data
+
+Param: C<$data> - any - All the data
+
+Return: Array - all the lines to be out put
+
+Description: Returns that there was no data or that the data was undefined
+
+=head3 C<data_sub_fields ($field, $data)>
+
+Param: C<$field> - string - The name of the field of data
+
+Param: C<$data> - any - The data being displayed
+
+Return: Array - all the lines to be out put
+
+Description: Shows only the sub keys of $data that are defined to be displayed
+
+=head3 C<data_scalar ($field, $data)>
+
+Param: C<$field> - string - The name of the field of data
+
+Param: C<$data> - any - The data being displayed
+
+Return: Array - all the lines to be out put
+
+Description: Just shows the simple data
 
 =head1 DIAGNOSTICS
 
