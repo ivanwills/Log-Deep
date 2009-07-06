@@ -10,14 +10,11 @@ use strict;
 use warnings;
 use version;
 use Carp;
-use Scalar::Util;
-use List::Util;
-#use List::MoreUtils;
-use CGI;
 use Data::Dumper qw/Dumper/;
 use English qw/ -no_match_vars /;
 use base qw/Exporter/;
 use overload '""' => \&name;
+use Time::HiRes qw/sleep/;
 
 our $VERSION     = version->new('0.3.0');
 our @EXPORT_OK   = qw//;
@@ -41,11 +38,23 @@ sub line {
 
 	my $fh   = $self->{handle};
 	my $line = <$fh>;
+	my $count = 0;
 
-	if ($line) {
+	if (defined $line) {
 		while ( $line !~ /\n$/xms ) {
 			# guarentee that we have a full log line, ie if we read a line before it has been completely written
 			$line .= <$fh>;
+
+			if ($count++ > 200) {
+				# give up if after 2s we still don't have a full line
+				last;
+			}
+			else {
+				# sleep a little to give the logging process time to write the rest of the line
+				sleep 0.01;
+				# reset the handle so that we can read more
+				$self->reset;
+			}
 		}
 	}
 
