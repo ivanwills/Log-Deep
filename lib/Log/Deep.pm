@@ -200,9 +200,10 @@ sub record {
 	}
 
 	# set up
-	$param->{stack} = longmess;
+	$param->{stack} = substr longmess, 0, 1_000;
 	$param->{stack} =~ s/^\s+[^\n]*Log::Deep::[^\n]*\n//gxms;
 	$param->{stack} =~ s/\A\s at [^\n]*\n\s+//gxms;
+	$param->{stack} =~ s/\n[^\n]+\Z/\n.../xms;
 
 	my @log = (
 		strftime('%Y-%m-%d %H:%M:%S', localtime),
