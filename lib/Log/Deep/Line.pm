@@ -74,12 +74,12 @@ sub parse {
 
 	# re-process the data so we can display what is needed.
 	my $DATA;
-	if ( $log[-1] =~ /;$/xms ) {
+	if ( $log[-1] =~ /;$/xms && length $log[-1] < 1_000_000 ) {
 		local $SIG{__WARN__} = sub {};
 		eval $log[-1];  ## no critic
 	}
 	else {
-		warn 'There appears to be a problem with the data on line ' . $file->{handle}->input_line_number . "\n";
+		warn '' . (length $log[-1] < 1_000_000 ? 'The data is too large to process' : 'There appears to be a problem with the data' ) . ' on line ' . $file->{handle}->input_line_number . "\n";
 		$DATA = {};
 	}
 
@@ -164,7 +164,7 @@ sub data {
 	# check for any fields that should be displayed
 	FIELD:
 	for my $field ( sort keys %{ $display } ) {
-		push @out, 
+		push @out,
 			  $display->{$field} eq 0                                      ? ()
 			: !defined $data->{$field}                                     ? data_missing($field, $data)
 			: ref $display->{$field} eq 'ARRAY' || $display->{$field} ne 1 ? data_sub_fields($field, $data->{$field})
@@ -178,6 +178,7 @@ sub data {
 
 sub data_missing {
 	my ( $self, $field, $data ) = @_;
+	return if ref $field;
 	return if $field eq 'data';
 	return "\$$field = " . (exists $data->{field} ? 'undef' : 'missing') . "\n";
 }

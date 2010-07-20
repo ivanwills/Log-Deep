@@ -9,7 +9,7 @@ package Log::Deep::File;
 use strict;
 use warnings;
 use version;
-use Carp;
+use Carp qw/carp croak confess/;
 use Data::Dumper qw/Dumper/;
 use English qw/ -no_match_vars /;
 use base qw/Exporter/;

@@ -159,6 +159,8 @@ sub read_file {
 	my %sessions;
 	my $line_count = 0;
 
+	confess "read_file called with out a file object!" if !ref $file;
+
 	# read the rest of the lines in the file
 	LINE:
 	while (my $line = $file->line) {
