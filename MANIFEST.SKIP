@@ -61,3 +61,5 @@ Debian_CPANTS.txt
 
 # Avoid archives of this distribution
 \bLog-Deep-[\d\.\_]+
+
+.*[.]orig
