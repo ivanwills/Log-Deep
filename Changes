@@ -1,5 +1,27 @@
 Revision history for Log-Deep
 
+0.3.1   2010-07-20
+        Added new dependencies
+        Added checks for log lines that are too long to process
+        Added truncating stack trace if too large
+        Fixed missing required modules
+        Updated package files to latest standard
+        Added more error checking code
+        Refactored data handling code into seperate functions
+        Trying harder to get full log lines
+        Sorted out some edge cases with displaying extra data
+        Forgot to release 0.3.0 :-)
+        Fixed typos
+        Updated/Fixed the documentation
+        upped version number
+        Added missing files
+        Removed optional modules
+        Added code to try to reduce the cpu usage of reading log files and reduce the warning messages produced
+        Added File package to load tests
+        Added code to try to better guarentee log messages get written to file, updated test up use that code
+        Cleaned up code/build files
+        Refactored out the file and line code into seperate modules and fixed the tests
+
 0.2.0   2009-05-23
         Many stability improvements
         Improved test coverage, particularly of Log::Deep::Read
