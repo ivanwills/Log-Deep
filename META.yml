@@ -1,39 +1,51 @@
 ---
-name: Log-Deep
-version: 0.3.0
+abstract: 'Deep Logging of information about a script state'
 author:
   - 'Ivan Wills <ivan.wills@gmail.com>'
-abstract: Deep Logging of information about a script state
-license: perl
-resources:
-  license: http://dev.perl.org/licenses/
-requires:
-  Clone: 0.29
-  Data::Dump::Streamer: 2.08
-  List::MoreUtils: 0
-  Readonly: 1.03
-  Term::ANSIColor: 0
-  Time::HiRes: 1.9711
 build_requires:
+  Test::Exception: 0
   Test::More: 0
   Test::NoWarnings: 0
   Test::Pod: 0
   Test::Pod::Coverage: 0
   Test::Spelling: 0
-provides:
-  Log::Deep:
-    file: lib/Log/Deep.pm
-    version: 0.3.0
-  Log::Deep::File:
-    file: lib/Log/Deep/File.pm
-    version: 0.3.0
-  Log::Deep::Line:
-    file: lib/Log/Deep/Line.pm
-    version: 0.3.0
-  Log::Deep::Read:
-    file: lib/Log/Deep/Read.pm
-    version: 0.3.0
-generated_by: Module::Build version 0.33
+  Test::Warn: 0
+configure_requires:
+  Module::Build: 0.36
+generated_by: 'Module::Build version 0.3607'
+license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
+name: Log-Deep
+provides:
+  Log::Deep:
+    file: lib/Log/Deep.pm
+    version: v0.3.1
+  Log::Deep::File:
+    file: lib/Log/Deep/File.pm
+    version: v0.3.1
+  Log::Deep::Line:
+    file: lib/Log/Deep/Line.pm
+    version: v0.3.1
+  Log::Deep::Read:
+    file: lib/Log/Deep/Read.pm
+    version: v0.3.1
+requires:
+  Clone: 0.29
+  Data::Dump::Streamer: 2.08
+  File::Slurp: 0
+  List::MoreUtils: 0
+  Moose: 0
+  MooseX::Types::Path::Class: 0
+  Path::Class: 0
+  Readonly: 1.03
+  Term::ANSIColor: 0
+  Time::HiRes: 1.9711
+  perl: 5.008
+  version: 0
+resources:
+  bugtracker: http://rt.cpan.org/NoAuth/Bugs.html?Dist=Log-Deep
+  license: http://dev.perl.org/licenses/
+  repository: git://github.com/ivanwills/Log-Deep.git
+version: v0.3.1
