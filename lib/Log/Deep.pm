@@ -235,7 +235,7 @@ sub log_handle {
 	my $self = shift;
 
 	if ( !$self->{handle} ) {
-		$self->{log_dir}  ||= '/tmp';
+		$self->{log_dir}  ||= $ENV{TMP} || '/tmp';
 		$self->{log_name} ||= (split m{/}, $0)[-1] || 'deep';
 		$self->{date_fmt} ||= '%Y-%m-%d';
 		$self->{log_date}   = strftime $self->{date_fmt}, localtime;
@@ -252,7 +252,7 @@ sub log_handle {
 			close $fh;
 		}
 
-		open my $fh, '>>', $file or die "Could not open log file $file: $!\n";
+		open my $fh, '>>', $file or die "Could not open log file $file: $OS_ERROR\n";
 		$self->{file}   = $file;
 		$self->{handle} = $fh;
 
