@@ -19,5 +19,5 @@ for my $dir ( split /:/, $ENV{PATH} ) {
 plan skip_all => "Test::Spelling required for testing POD spelling" if $@;
 plan skip_all => "spell cmd required for testing POD spelling" if !$found;
 
-add_stopwords(qw/CPAN AnnoCPAN RT NSW Hornsby Param Params Arg Plugins plugins pm url ie CGI analyse colour colouring Colours coloured ID's/);
+add_stopwords(qw/CPAN AnnoCPAN RT NSW Hornsby Param Params Arg Plugins plugins pm url ie CGI analyse colour colouring Colours coloured ID's id c CGI.pm mono/);
 all_pod_files_spelling_ok();
