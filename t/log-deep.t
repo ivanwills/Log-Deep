@@ -11,118 +11,126 @@ use Data::Dumper qw/Dumper/;
 use File::Slurp qw/slurp/;
 use Log::Deep;
 
-my $deep = Log::Deep->new();
-isa_ok( $deep, 'Log::Deep', 'Can create a log object');
+my $deep;
+eval { $deep = Log::Deep->new; };
 
-ok( -f $deep->file, 'Check that the file is created/exists' );
+SKIP:
+{
+	if ($EVAL_ERROR) {
+		skip("Could not wright log file: $EVAL_ERROR", 26) if $EVAL_ERROR;
+	}
 
-# truncate the file and reset the writing at the start
-truncate $deep->{handle}, 0;
-seek $deep->{handle}, 0, 0;
+	isa_ok( $deep, 'Log::Deep', 'Can create a log object');
 
-my $expected_length = 0;
-my $found_length    = log_length($deep);
+	ok( -f $deep->file, 'Check that the file is created/exists' );
 
-is( $found_length, $expected_length, 'Check that we realy do have a zero length file');
+	# truncate the file and reset the writing at the start
+	truncate $deep->{handle}, 0;
+	seek $deep->{handle}, 0, 0;
 
-$deep->session(0);
-$deep->flush;
-$expected_length = $found_length + 1;
-$found_length    = log_length($deep);
+	my $expected_length = 0;
+	my $found_length    = log_length($deep);
 
-is( $found_length, $expected_length, 'Checking that session writes one log line');
+	is( $found_length, $expected_length, 'Check that we realy do have a zero length file');
 
-dies_ok { $deep->fatal('test') } "Fatal dies";
-$deep->flush;
-$expected_length = $found_length + 1;
-$found_length    = log_length($deep);
+	$deep->session(0);
+	$deep->flush;
+	$expected_length = $found_length + 1;
+	$found_length    = log_length($deep);
 
-is( $found_length, $expected_length, 'Checking that fatal writes one log line');
+	is( $found_length, $expected_length, 'Checking that session writes one log line');
 
-$deep->error('test');
-$deep->flush;
-$expected_length = $found_length + 1;
-$found_length    = log_length($deep);
+	dies_ok { $deep->fatal('test') } "Fatal dies";
+	$deep->flush;
+	$expected_length = $found_length + 1;
+	$found_length    = log_length($deep);
 
-is( $found_length, $expected_length, 'Checking that error writes one log line');
+	is( $found_length, $expected_length, 'Checking that fatal writes one log line');
 
-$deep->warn('test');
-$deep->flush;
-$expected_length = $found_length + 1;
-$found_length    = log_length($deep);
+	$deep->error('test');
+	$deep->flush;
+	$expected_length = $found_length + 1;
+	$found_length    = log_length($deep);
 
-is( $found_length, $expected_length, 'Checking that warn writes one log line');
+	is( $found_length, $expected_length, 'Checking that error writes one log line');
 
-$deep->debug('test');
-$deep->flush;
-$expected_length = $found_length + 0;
-$found_length    = log_length($deep);
+	$deep->warn('test');
+	$deep->flush;
+	$expected_length = $found_length + 1;
+	$found_length    = log_length($deep);
 
-is( $found_length, $expected_length, 'Checking that debug writes zero log lines');
+	is( $found_length, $expected_length, 'Checking that warn writes one log line');
 
-$deep->enable('debug');
-$deep->debug('test');
-$deep->flush;
-$expected_length = $found_length + 1;
-$found_length    = log_length($deep);
+	$deep->debug('test');
+	$deep->flush;
+	$expected_length = $found_length + 0;
+	$found_length    = log_length($deep);
 
-is( $found_length, $expected_length, 'Checking that debug writes one log line');
+	is( $found_length, $expected_length, 'Checking that debug writes zero log lines');
 
-$deep->message('test');
-$deep->flush;
-$expected_length = $found_length + 0;
-$found_length    = log_length($deep);
+	$deep->enable('debug');
+	$deep->debug('test');
+	$deep->flush;
+	$expected_length = $found_length + 1;
+	$found_length    = log_length($deep);
 
-is( $found_length, $expected_length, 'Checking that message writes zero log lines');
+	is( $found_length, $expected_length, 'Checking that debug writes one log line');
 
-$deep->enable('message');
-$deep->message('test');
-$deep->flush;
-$expected_length = $found_length + 1;
-$found_length    = log_length($deep);
+	$deep->message('test');
+	$deep->flush;
+	$expected_length = $found_length + 0;
+	$found_length    = log_length($deep);
 
-is( $found_length, $expected_length, 'Checking that message writes one log line');
+	is( $found_length, $expected_length, 'Checking that message writes zero log lines');
 
-$deep->info('test');
-$deep->flush;
-$expected_length = $found_length + 0;
-$found_length    = log_length($deep);
+	$deep->enable('message');
+	$deep->message('test');
+	$deep->flush;
+	$expected_length = $found_length + 1;
+	$found_length    = log_length($deep);
 
-is( $found_length, $expected_length, 'Checking that info writes zero log lines');
+	is( $found_length, $expected_length, 'Checking that message writes one log line');
 
-$deep->enable('info');
-$deep->info('test');
-$deep->flush;
-$expected_length = $found_length + 1;
-$found_length    = log_length($deep);
+	$deep->info('test');
+	$deep->flush;
+	$expected_length = $found_length + 0;
+	$found_length    = log_length($deep);
 
-is( $found_length, $expected_length, 'Checking that info writes one log line');
+	is( $found_length, $expected_length, 'Checking that info writes zero log lines');
 
-$deep->security('test');
-$deep->flush;
-$expected_length = $found_length + 1;
-$found_length    = log_length($deep);
+	$deep->enable('info');
+	$deep->info('test');
+	$deep->flush;
+	$expected_length = $found_length + 1;
+	$found_length    = log_length($deep);
 
-is( $found_length, $expected_length, 'Checking that security writes one log line');
+	is( $found_length, $expected_length, 'Checking that info writes one log line');
 
-# turn on catching warnings
-ok( $deep->catch_warnings(1), 'Catching warnings now' );
-warn "This should be cought";
-$deep->flush;
-$expected_length = $found_length + 1;
-$found_length    = log_length($deep);
+	$deep->security('test');
+	$deep->flush;
+	$expected_length = $found_length + 1;
+	$found_length    = log_length($deep);
 
-is( $found_length, $expected_length, 'Checking that warn() writes one log line');
+	is( $found_length, $expected_length, 'Checking that security writes one log line');
 
-# turn back off warning capture
-ok( !$deep->catch_warnings(0), 'No longer catching warnings' );
+	# turn on catching warnings
+	ok( $deep->catch_warnings(1), 'Catching warnings now' );
+	warn "This should be cought";
+	$deep->flush;
+	$expected_length = $found_length + 1;
+	$found_length    = log_length($deep);
 
-warning_is {warn "Not cought"} 'Not cought', 'Warnings are no longer cought';
-$expected_length = $found_length;
-$found_length    = log_length($deep);
+	is( $found_length, $expected_length, 'Checking that warn() writes one log line');
 
-is( $found_length, $expected_length, 'Checking that warn() does not write one log line');
+	# turn back off warning capture
+	ok( !$deep->catch_warnings(0), 'No longer catching warnings' );
 
+	warning_is {warn "Not cought"} 'Not cought', 'Warnings are no longer cought';
+	$expected_length = $found_length;
+	$found_length    = log_length($deep);
+
+	is( $found_length, $expected_length, 'Checking that warn() does not write one log line');
+}
 
 sub log_length {
 	my ($deep) = @_;
