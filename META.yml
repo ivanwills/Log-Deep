@@ -21,7 +21,7 @@ name: Log-Deep
 provides:
   Log::Deep:
     file: lib/Log/Deep.pm
-    version: v0.3.1
+    version: v0.3.2
   Log::Deep::File:
     file: lib/Log/Deep/File.pm
     version: v0.3.1
@@ -47,5 +47,5 @@ requires:
 resources:
   bugtracker: http://rt.cpan.org/NoAuth/Bugs.html?Dist=Log-Deep
   license: http://dev.perl.org/licenses/
-  repository: git://github.com/ivanwills/Log-Deep.git
-version: v0.3.1
+  repository: http://github.com/ivanwills/Log-Deep
+version: v0.3.2

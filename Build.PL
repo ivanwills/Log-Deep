@@ -35,7 +35,7 @@ my $builder = Module::Build->new(
 	create_license     => 1,
 	meta_merge         => {
 		resources => {
-			repository => 'git://github.com/ivanwills/Log-Deep.git',
+			repository => 'http://github.com/ivanwills/Log-Deep',
 			bugtracker => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=Log-Deep',
 		},
 	},

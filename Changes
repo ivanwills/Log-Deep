@@ -1,5 +1,8 @@
 Revision history for Log-Deep
 
+0.3.2   2010-08-02
+        Fixed some test failures for author tests
+
 0.3.1   2010-07-20
         Added new dependencies
         Added checks for log lines that are too long to process
