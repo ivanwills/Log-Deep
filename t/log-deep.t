@@ -7,6 +7,7 @@ use Test::NoWarnings;
 use Test::Warn;
 use Test::Exception;
 use Data::Dumper qw/Dumper/;
+use English qw/ -no_match_vars /;
 
 use File::Slurp qw/slurp/;
 use Log::Deep;
