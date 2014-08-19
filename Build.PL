@@ -11,7 +11,6 @@ my $builder = Module::Build->new(
         perl                         => 5.008,
         'Data::Dump::Streamer'       => '2.08',
         'Clone'                      => '0.29',
-        'File::Slurp'                => 0,
         'List::MoreUtils'            => 0,
         'Moose'                      => 0,
         'MooseX::Types::Path::Class' => 0,
@@ -24,14 +23,16 @@ my $builder = Module::Build->new(
     configure_requires => {
         'Module::Build' => 0.38,
     },
-    build_requires      => {
-        'Test::More'          => 0,
+    build_requires => {
+        'Test::More'       => 0,
+        'Test::NoWarnings' => 0,
+        'Test::Warn'       => 0,
+        'Test::Exception'  => 0,
+    },
+    recommends => {
         'Test::Pod'           => 0,
         'Test::Pod::Coverage' => 0,
         'Test::Spelling'      => 0,
-        'Test::NoWarnings'    => 0,
-        'Test::Warn'          => 0,
-        'Test::Exception'     => 0,
     },
     add_to_cleanup     => [ 'Log-Deep-*' ],
     create_makefile_pl => 'traditional',
