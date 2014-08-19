@@ -23,3 +23,4 @@ t/log-deep.t
 t/log-deep-read.t
 t/log-deep-line.t
 bin/deep
+META.json

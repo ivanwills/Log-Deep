@@ -6,13 +6,11 @@ build_requires:
   Test::Exception: 0
   Test::More: 0
   Test::NoWarnings: 0
-  Test::Pod: 0
-  Test::Pod::Coverage: 0
-  Test::Spelling: 0
   Test::Warn: 0
 configure_requires:
-  Module::Build: 0.36
-generated_by: 'Module::Build version 0.3607'
+  Module::Build: 0.38
+dynamic_config: 1
+generated_by: 'Module::Build version 0.4204, CPAN::Meta::Converter version 2.133380'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -21,20 +19,23 @@ name: Log-Deep
 provides:
   Log::Deep:
     file: lib/Log/Deep.pm
-    version: v0.3.2
+    version: v0.3.3
   Log::Deep::File:
     file: lib/Log/Deep/File.pm
-    version: v0.3.1
+    version: v0.3.3
   Log::Deep::Line:
     file: lib/Log/Deep/Line.pm
-    version: v0.3.1
+    version: v0.3.3
   Log::Deep::Read:
     file: lib/Log/Deep/Read.pm
-    version: v0.3.1
+    version: v0.3.3
+recommends:
+  Test::Pod: 0
+  Test::Pod::Coverage: 0
+  Test::Spelling: 0
 requires:
   Clone: 0.29
   Data::Dump::Streamer: 2.08
-  File::Slurp: 0
   List::MoreUtils: 0
   Moose: 0
   MooseX::Types::Path::Class: 0
@@ -48,4 +49,4 @@ resources:
   bugtracker: http://rt.cpan.org/NoAuth/Bugs.html?Dist=Log-Deep
   license: http://dev.perl.org/licenses/
   repository: http://github.com/ivanwills/Log-Deep
-version: v0.3.2
+version: v0.3.3
