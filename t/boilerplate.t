@@ -1,8 +1,8 @@
-#!perl -T
+#!/usr/bin/perl
 
 use strict;
 use warnings;
-use Test::More tests => 4 + 1;
+use Test::More tests => 6 + 1;
 use Test::NoWarnings;
 
 sub not_in_file_ok {
@@ -38,15 +38,15 @@ sub module_boilerplate_ok {
 }
 
 not_in_file_ok(README =>
-"The README is used..."       => qr/The README is used/,
-"'version information here'"  => qr/to provide version information/,
+    "The README is used..."       => qr/The README is used/,
+    "'version information here'"  => qr/to provide version information/,
 );
 
 not_in_file_ok(Changes =>
-"placeholder date/time"       => qr(Date/time)
+    "placeholder date/time"       => qr(Date/time)
 );
-
 
 module_boilerplate_ok('lib/Log/Deep.pm');
 module_boilerplate_ok('lib/Log/Deep/Read.pm');
-
+module_boilerplate_ok('lib/Log/Deep/File.pm');
+module_boilerplate_ok('lib/Log/Deep/Line.pm');
