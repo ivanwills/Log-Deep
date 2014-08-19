@@ -6,7 +6,6 @@ use Test::More tests => 13 + 1;
 use Test::NoWarnings;
 use Data::Dumper qw/Dumper/;
 
-use File::Slurp qw/slurp/;
 use Log::Deep::Line;
 
 my $deep = Log::Deep::Line->new();
