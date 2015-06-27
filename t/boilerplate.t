@@ -60,7 +60,6 @@ subtest 'Changes' => sub {
 
 module_boilerplate_ok('bin/deep');
 module_boilerplate_ok('lib/Log/Deep.pm');
-module_boilerplate_ok('lib/Log/Deep.pm.orig');
 module_boilerplate_ok('lib/Log/Deep/File.pm');
 module_boilerplate_ok('lib/Log/Deep/Line.pm');
 module_boilerplate_ok('lib/Log/Deep/Read.pm');
