@@ -2,8 +2,8 @@
 
 use strict;
 use warnings;
-use Test::More tests => 3 + 1;
-use Test::NoWarnings;
+use Test::More;
+use Test::Warnings;
 use Data::Dumper qw/Dumper/;
 
 use Log::Deep::Read;
@@ -18,3 +18,4 @@ for ( 1..40 ) {
     $colour{$_} = $deep->session_colour($_);
 }
 is( ( scalar keys %colour ), 40, "40 sessions == 40 colours" );
+done_testing();

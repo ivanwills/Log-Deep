@@ -2,8 +2,8 @@
 
 use strict;
 use warnings;
-use Test::More tests => 20 + 1;
-use Test::NoWarnings;
+use Test::More;
+use Test::Warnings;
 use Test::Warn;
 use Test::Exception;
 use Data::Dumper qw/Dumper/;
@@ -132,6 +132,7 @@ SKIP:
 
     is( $found_length, $expected_length, 'Checking that warn() does not write one log line');
 }
+done_testing();
 
 sub log_length {
     my ($deep) = @_;

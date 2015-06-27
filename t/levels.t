@@ -1,8 +1,8 @@
 
 use strict;
 use warnings;
-use Test::More tests => 26 + 1;
-use Test::NoWarnings;
+use Test::More;
+use Test::Warnings;
 use English;
 
 use Log::Deep;
@@ -82,3 +82,4 @@ SKIP:
 	$level = $deep->level;
 	is_deeply( $level, { fatal=>1, error=>1, warn=>1, debug=>1, message=>0, info=>0 }, "Check that the default setup is as expected" );
 }
+done_testing();

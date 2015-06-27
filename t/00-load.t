@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 
-use Test::More tests => 4 + 1;
-use Test::NoWarnings;
+use Test::More;
+use Test::Warnings;
 
 BEGIN {
     use_ok( 'Log::Deep'       );
@@ -14,3 +14,4 @@ BEGIN {
 }
 
 diag( "Testing Log::Deep $Log::Deep::VERSION, Perl $], $^X" );
+done_testing();

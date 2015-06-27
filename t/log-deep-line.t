@@ -2,8 +2,8 @@
 
 use strict;
 use warnings;
-use Test::More tests => 13 + 1;
-use Test::NoWarnings;
+use Test::More;
+use Test::Warnings;
 use Data::Dumper qw/Dumper/;
 
 use Log::Deep::Line;
@@ -31,3 +31,4 @@ $deep->parse( 'date,session,level,message \, test\n,$DATA={};', { name => 'test'
 ok( $deep->show(), 'Ordinarly the line is displayed');
 $deep->parse( ',session,level,message \, test\n,$DATA={};', { name => 'test' } );
 ok( !$deep->show(), 'no data the line is not displayed');
+done_testing();
