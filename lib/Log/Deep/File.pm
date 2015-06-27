@@ -16,7 +16,7 @@ use base qw/Exporter/;
 use overload '""' => \&name;
 use Time::HiRes qw/sleep/;
 
-our $VERSION     = version->new('0.3.3');
+our $VERSION     = version->new('0.3.4');
 our @EXPORT_OK   = qw//;
 our %EXPORT_TAGS = ();
 
@@ -86,7 +86,7 @@ Log::Deep::File - Object for keeping track of info related to a log file.
 
 =head1 VERSION
 
-This documentation refers to Log::Deep::File version 0.3.3.
+This documentation refers to Log::Deep::File version 0.3.4.
 
 =head1 SYNOPSIS
 

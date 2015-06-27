@@ -1,5 +1,16 @@
 Revision history for Log-Deep
 
+0.3.4   2015-06-27
+        Updating for release of version 0.3.4
+        Switched tests to Test::Warnings (Ivan Wills)
+        Updated dependencies (Ivan Wills)
+        Fixed accedental test (Ivan Wills)
+        Updated boilerplate test (Ivan Wills)
+        Removed built files (Ivan Wills)
+        Removed unneeded tag (Ivan Wills)
+        Added specific Test::More version for the features being used (Ivan Wills)
+        Build changes (Ivan Wills)
+
 0.3.3   2014-08-19
         Updated to latest standard (Ivan Wills)
         Removed no longer used dependency File::Slurp, and moved not required dependencies to recommends (Ivan Wills)

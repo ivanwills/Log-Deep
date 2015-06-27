@@ -16,7 +16,7 @@ use English qw/ -no_match_vars /;
 use base qw/Exporter/;
 use Term::ANSIColor;
 
-our $VERSION     = version->new('0.3.3');
+our $VERSION     = version->new('0.3.4');
 our @EXPORT_OK   = qw//;
 our %EXPORT_TAGS = ();
 
@@ -224,7 +224,7 @@ Log::Deep::Line - Encapsulates one line from a log file
 
 =head1 VERSION
 
-This documentation refers to Log::Deep::Line version 0.3.3.
+This documentation refers to Log::Deep::Line version 0.3.4.
 
 =head1 SYNOPSIS
 
