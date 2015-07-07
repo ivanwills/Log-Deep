@@ -9,7 +9,7 @@ use Test::Exception;
 use Data::Dumper qw/Dumper/;
 use English qw/ -no_match_vars /;
 
-use Path::Class;
+use Path::Tiny;
 use Log::Deep;
 
 my $deep;
@@ -138,7 +138,7 @@ sub log_length {
     my ($deep) = @_;
 
     my $file   = $deep->file;
-    my @lines  = split /\n/xms, file($file)->slurp;
+    my @lines  = split /\n/xms, path($file)->slurp;
 
     return scalar @lines;
 }
