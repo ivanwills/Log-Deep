@@ -1,5 +1,12 @@
 Revision history for Log-Deep
 
+0.3.5   2015-07-27
+        Updating for release of version 0.3.5
+        Added missing file (Ivan Wills)
+        Converted to Path::Tiny (Ivan Wills)
+        Fixed boilerplate (Ivan Wills)
+        Changed to test README.pod (Ivan Wills)
+
 0.3.4   2015-06-27
         Updating for release of version 0.3.4
         Switched tests to Test::Warnings (Ivan Wills)
